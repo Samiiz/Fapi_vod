@@ -92,8 +92,29 @@ jobs:
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: poetry install --no-root
 
-      - name: Setup edgedb
+      - name: Setup EdgeDB
         uses: edgedb/setup-edgedb@v1
+        with:
+          cli-version: stable
+          server-version: stable
+
+      - name: Debug EdgeDB Installation
+        run: |
+          echo "Checking installed EdgeDB CLI..."
+          ls -lah /opt/hostedtoolcache/edgedb-cli/
+          ls -lah /opt/hostedtoolcache/edgedb-cli/6.1.2/x64/
+
+      - name: Set EdgeDB CLI Permissions
+        run: |
+          chmod +x /opt/hostedtoolcache/edgedb-cli/6.1.2/x64/edgedb
+
+      - name: Check EdgeDB Server Status
+        run: |
+          edgedb instance list || echo "No running instances found."
+
+      - name: Start EdgeDB Instance (if needed)
+        run: |
+          edgedb instance create testdb || echo "EdgeDB instance already exists."
 
       - name: Run tests
         run: |
