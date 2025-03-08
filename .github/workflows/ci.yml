@@ -94,7 +94,6 @@ jobs:
 
       - name: Setup EdgeDB
         uses: geldata/setup-gel@v1
-        run: gel --version
 
       - name: Run tests
         run: |
