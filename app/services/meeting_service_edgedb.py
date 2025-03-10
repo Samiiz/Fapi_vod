@@ -1,9 +1,7 @@
 import uuid
 
 from app.queries.meeting.create_meeting_async_edgeql import (
-    CreateMeetingResult,
-    create_meeting,
-)
+    CreateMeetingResult, create_meeting)
 from app.utils.base62 import Base62
 from app.utils.edgedb import edgedb_client
 
