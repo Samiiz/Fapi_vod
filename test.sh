@@ -15,7 +15,7 @@ poetry run ruff check --fix
 echo -e "\nok\n"
 
 echo -e "Starting mypy"
-poetry run mypy .
+poetry run dmypy run -- .
 echo -e "\nok\n"
 
 echo "Starting pytest with coverage"
