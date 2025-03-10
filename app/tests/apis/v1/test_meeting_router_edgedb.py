@@ -18,4 +18,6 @@ async def test_api_create_meeting_edgedb() -> None:
 
     url_code = response.json()["url_code"]
 
-    assert (await edgedb_client.query_single(f"select exists (select Meeting filter .url_code = '{url_code}');")) is True
+    assert (
+        await edgedb_client.query_single(f"select exists (select Meeting filter .url_code = '{url_code}');")
+    ) is True
