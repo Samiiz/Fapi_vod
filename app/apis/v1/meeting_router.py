@@ -50,7 +50,7 @@ async def api_update_meeting_date_range_edgdb(
     if update_meeting_date_range_request.exceeds_max_range():
         raise HTTPException(
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"start {update_meeting_date_range_request.start_date} and end {update_meeting_date_range_request.end_date} should be within {MEETING_DATE_MAX_RANGE.days} days",
+            detail=f"start_date: {update_meeting_date_range_request.start_date} and end_date: {update_meeting_date_range_request.end_date} should be within {MEETING_DATE_MAX_RANGE.days} days",
         )
     meeting_before_update = await service_get_meeting_edgedb(meeting_url_code)
     if meeting_before_update is None:
@@ -60,12 +60,12 @@ async def api_update_meeting_date_range_edgdb(
     if meeting_before_update.start_date or meeting_before_update.end_date:
         raise HTTPException(
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"meeting: {meeting_url_code} start: {meeting_before_update.start_date} end: {meeting_before_update.end_date} are already set",
+            detail=f"meeting: {meeting_url_code} start_date: {meeting_before_update.start_date} end_date: {meeting_before_update.end_date} are already set",
         )
     meeting_after_update = await service_update_meeting_date_range_edgedb(
         meeting_url_code, update_meeting_date_range_request.start_date, update_meeting_date_range_request.end_date
     )
-    assert meeting_after_update  # meeting 이 있었으므로 (삭제 기능은 없으므로) result 는 무조건 있습니다.
+    assert meeting_after_update
     return GetMeetingResponse(
         url_code=meeting_after_update.url_code,
         end_date=meeting_after_update.end_date,
