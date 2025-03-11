@@ -47,6 +47,10 @@ async def test_api_get_meeting_edgedb() -> None:
     assert response.status_code == HTTP_200_OK
     response_body = response.json()
     assert response_body["url_code"] == url_code
+    assert response_body["start_date"] is None
+    assert response_body["end_date"] is None
+    assert response_body["title"] == ""
+    assert response_body["location"] == ""
 
 
 async def test_api_get_meeting_404() -> None:
