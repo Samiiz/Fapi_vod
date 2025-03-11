@@ -1,3 +1,5 @@
+from datetime import date
+
 import httpx
 from starlette.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
@@ -53,3 +55,31 @@ async def test_api_get_meeting_404() -> None:
     # Then
     assert response.status_code == HTTP_404_NOT_FOUND
     assert response.json()["detail"] == "meeting with url_code: invalid_url not found"
+
+
+async def test_api_update_meeting_date_range_edgedb() -> None:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://test",
+    ) as client:
+        create_meeting_response = await client.post(
+            url="/v1/edgedb/meetings",
+        )
+        url_code = create_meeting_response.json()["url_code"]
+
+        response = await client.patch(
+            url=f"/v1/edgedb/meetings/{url_code}/date_range",
+            json={"start_date": "2025-10-10", "end_date": "2025-10-20"},
+        )
+
+    assert response.status_code == HTTP_200_OK
+    response_body = response.json()
+
+    assert response_body["start_date"] == "2025-10-10"
+    assert response_body["end_date"] == "2025-10-20"
+
+    meeting = await edgedb_client.query_single(
+        f"select Meeting {{start_date, end_date}} filter .url_code = '{url_code}';"
+    )
+    assert meeting.start_date == date(2025, 10, 10)
+    assert meeting.end_date == date(2025, 10, 20)
