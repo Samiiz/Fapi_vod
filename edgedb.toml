@@ -1,4 +1,2 @@
-watch = []
-
-[instance]
+[edgedb]
 server-version = "5.7"
