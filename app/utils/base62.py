@@ -9,7 +9,7 @@ class Base62:
     @classmethod
     def encode(cls, num: int) -> str:
         if num < 0:
-            raise ValueError(f"{cls}.encode() needs positive integer but you passed: {num}")
+            raise ValueError(f"{cls.__name__}.encode() needs positive integer but you passed: {num}")
 
         if num == 0:
             return cls.BASE[0]
