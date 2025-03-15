@@ -22,7 +22,21 @@ async def get_meeting_by_url_code(
             """\
         with
             url_code := <str>$url_code,
-        select Meeting {url_code, start_date, end_date, location, title}
+        select Meeting {
+            url_code, 
+            start_date, 
+            end_date, 
+            title, 
+            location, 
+            participants: {
+                name, 
+                dates: {
+                    date, 
+                    starred, 
+                    enabled
+                } order by .date
+            }
+        }
         filter .url_code = url_code
         limit 1\
         """,

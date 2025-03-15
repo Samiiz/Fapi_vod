@@ -6,5 +6,21 @@ select (
     update Meeting
     filter .url_code = url_code
     set {start_date := start_date, end_date := end_date}
-) {url_code, start_date, end_date, location, title}
+) {
+    url_code,
+    start_date,
+    end_date,
+    location,
+    title,
+    participants: {
+        id,
+        name,
+        dates: {
+            id,
+            date,
+            starred,
+            enabled
+        } order by .date
+    }
+}
 limit 1

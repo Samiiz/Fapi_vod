@@ -6,7 +6,11 @@ from starlette.status import (
 )
 
 from app.dtos.create_meeting_response import CreateMeetingResponse
-from app.dtos.get_meeting_response import GetMeetingResponse
+from app.dtos.get_meeting_response import (
+    GetMeetingResponse,
+    ParticipantDateResponse,
+    ParticipantResponse,
+)
 from app.dtos.update_meeting_request import (
     MEETING_DATE_MAX_RANGE,
     UpdateMeetingDateRangeRequest,
@@ -45,6 +49,12 @@ async def api_get_meeting_edgedb(meeting_url_code: str) -> GetMeetingResponse:
         start_date=meeting.start_date,
         title=meeting.title,
         location=meeting.location,
+        participants=[
+            ParticipantResponse(
+                id=p.id, name=p.name, dates=[ParticipantDateResponse(date=pd.date, id=pd.id) for pd in p.dates]
+            )
+            for p in meeting.participants
+        ],
     )
 
 
@@ -77,6 +87,12 @@ async def api_update_meeting_date_range_edgdb(
         start_date=meeting_after_update.start_date,
         title=meeting_after_update.title,
         location=meeting_after_update.location,
+        participants=[
+            ParticipantResponse(
+                id=p.id, name=p.name, dates=[ParticipantDateResponse(date=pd.date, id=pd.id) for pd in p.dates]
+            )
+            for p in meeting_after_update.participants
+        ],
     )
 
 

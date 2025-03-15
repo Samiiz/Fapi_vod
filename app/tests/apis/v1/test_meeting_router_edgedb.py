@@ -1,4 +1,4 @@
-from datetime import date
+import datetime
 
 import httpx
 from starlette.status import (
@@ -31,27 +31,55 @@ async def test_api_create_meeting_edgedb() -> None:
     ) is True
 
 
-async def test_api_get_meeting_edgedb() -> None:
+async def test_api_get_meeting() -> None:
     # Given
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://test",
+    ) as client:
         create_meeting_response = await client.post(
             url="/v1/edgedb/meetings",
         )
         url_code = create_meeting_response.json()["url_code"]
 
-        # When
-        response = await client.get(
-            url=f"/v1/edgedb/meetings/{url_code}",
+        await client.patch(
+            url=f"/v1/edgedb/meetings/{url_code}/date_range",
+            json={
+                "start_date": (start_date := "2025-12-01"),
+                "end_date": (end_date := "2025-12-04"),
+            },
         )
+
+        await client.post(
+            url="/v1/edgedb/participants",
+            json={
+                "name": (participant_name := "tester_hoon"),
+                "meeting_url_code": url_code,
+            },
+        )
+
+        await client.patch(f"/v1/edgedb/meetings/{url_code}/title", json={"title": (title := "abc")})
+
+        # When
+        response = await client.get(url=f"/v1/edgedb/meetings/{url_code}")
 
     # Then
     assert response.status_code == HTTP_200_OK
     response_body = response.json()
     assert response_body["url_code"] == url_code
-    assert response_body["start_date"] is None
-    assert response_body["end_date"] is None
-    assert response_body["title"] == ""
+    assert response_body["start_date"] == start_date
+    assert response_body["end_date"] == end_date
+    assert response_body["title"] == title
     assert response_body["location"] == ""
+    assert len(response_body["participants"]) == 1
+    participant = response_body["participants"][0]
+    assert participant["name"] == participant_name
+    assert [date["date"] for date in participant["dates"]] == [
+        "2025-12-01",
+        "2025-12-02",
+        "2025-12-03",
+        "2025-12-04",
+    ]
 
 
 async def test_api_get_meeting_404() -> None:
@@ -91,8 +119,8 @@ async def test_api_update_meeting_date_range_edgedb() -> None:
     meeting = await edgedb_client.query_single(
         f"select Meeting {{start_date, end_date}} filter .url_code = '{url_code}';"
     )
-    assert meeting.start_date == date(2025, 10, 10)
-    assert meeting.end_date == date(2025, 10, 20)
+    assert meeting.start_date == datetime.date(2025, 10, 10)
+    assert meeting.end_date == datetime.date(2025, 10, 20)
 
 
 async def test_can_not_update_meeting_date_range_when_range_is_too_long_edgedb() -> None:
